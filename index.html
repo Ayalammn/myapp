@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task Manager</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 60px auto; background: #f5f5f5; }
+    h1 { color: #333; }
+    form { display: flex; gap: 10px; margin-bottom: 20px; }
+    input[type=text] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+    button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    ul { list-style: none; padding: 0; }
+    li { background: white; padding: 12px 16px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .done-text { text-decoration: line-through; color: #aaa; }
+    a { margin-left: 10px; color: #888; text-decoration: none; font-size: 13px; }
+    a:hover { color: #333; }
+  </style>
+</head>
+<body>
+  <h1>Task Manager</h1>
+  <form action="/add" method="POST">
+    <input type="text" name="task" placeholder="Add a new task..." required />
+    <button type="submit">Add</button>
+  </form>
+  <ul>
+    {% for task in tasks %}
+    <li>
+      <span class="{{ 'done-text' if task.done else '' }}">{{ task.text }}</span>
+      <div>
+        {% if not task.done %}
+        <a href="/done/{{ loop.index0 }}">✓ Done</a>
+        {% endif %}
+        <a href="/delete/{{ loop.index0 }}">✕ Delete</a>
+      </div>
+    </li>
+    {% endfor %}
+    {% if not tasks %}
+    <li style="color:#aaa;">No tasks yet. Add one above!</li>
+    {% endif %}
+  </ul>
+</body>
+</html>
