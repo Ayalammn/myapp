@@ -1,41 +1,372 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Task Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 60px auto; background: #f5f5f5; }
-    h1 { color: #333; }
-    form { display: flex; gap: 10px; margin-bottom: 20px; }
-    input[type=text] { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
-    button { padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; }
-    ul { list-style: none; padding: 0; }
-    li { background: white; padding: 12px 16px; margin-bottom: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; }
-    .done-text { text-decoration: line-through; color: #aaa; }
-    a { margin-left: 10px; color: #888; text-decoration: none; font-size: 13px; }
-    a:hover { color: #333; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF8F4;
+      --warm-white: #FFFDF9;
+      --ink: #1C1A17;
+      --ink-muted: #6B6760;
+      --ink-faint: #B8B5AF;
+      --amber: #D4820A;
+      --amber-light: #FEF3DC;
+      --amber-border: #F5C96A;
+      --sage: #3B6D11;
+      --sage-light: #EAF3DE;
+      --red-light: #FCEBEB;
+      --red: #A32D2D;
+      --border: #E8E4DC;
+      --shadow: 0 1px 3px rgba(28, 26, 23, 0.08), 0 4px 16px rgba(28, 26, 23, 0.04);
+      --radius: 14px;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--ink);
+      color: var(--warm-white);
+      padding: 56px 0 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 50%, rgba(212, 130, 10, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 80% 30%, rgba(212, 130, 10, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber-border);
+      border: 1px solid rgba(245, 201, 106, 0.35);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2.4rem, 5vw, 3.4rem);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      color: var(--warm-white);
+    }
+
+    header h1 em {
+      font-style: italic;
+      color: var(--amber-border);
+    }
+
+    header p.subtitle {
+      margin-top: 12px;
+      font-size: 15px;
+      color: rgba(255, 253, 249, 0.55);
+      font-weight: 300;
+    }
+
+    /* ── Main content ── */
+    main {
+      max-width: 620px;
+      margin: 0 auto;
+      padding: 40px 20px 80px;
+    }
+
+    /* ── Stats bar ── */
+    .stats {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .stat-chip {
+      flex: 1;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+
+    .stat-chip .num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 26px;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .stat-chip .lbl {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Add form ── */
+    .add-form {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 28px;
+    }
+
+    .add-form input[type=text] {
+      flex: 1;
+      padding: 13px 18px;
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .add-form input[type=text]::placeholder { color: var(--ink-faint); }
+
+    .add-form input[type=text]:focus {
+      border-color: var(--amber);
+      box-shadow: 0 0 0 3px rgba(212, 130, 10, 0.12);
+    }
+
+    .add-form button {
+      padding: 13px 22px;
+      background: var(--ink);
+      color: var(--warm-white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .add-form button:hover { background: #2e2b26; }
+    .add-form button:active { transform: scale(0.97); }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--ink-faint);
+      margin-bottom: 12px;
+      padding-left: 2px;
+    }
+
+    /* ── Task list ── */
+    ul.task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    li.task-item {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 15px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+
+    li.task-item:hover {
+      box-shadow: var(--shadow);
+      border-color: #D8D4CC;
+    }
+
+    li.task-item.done {
+      background: var(--sage-light);
+      border-color: #C0DD97;
+    }
+
+    /* bullet circle */
+    .task-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--amber);
+    }
+
+    li.task-item.done .task-dot {
+      background: var(--sage);
+    }
+
+    .task-text {
+      flex: 1;
+      font-size: 15px;
+      color: var(--ink);
+      line-height: 1.45;
+    }
+
+    li.task-item.done .task-text {
+      text-decoration: line-through;
+      color: var(--sage);
+    }
+
+    .task-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .task-actions a {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 11px;
+      border-radius: 7px;
+      text-decoration: none;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .btn-done {
+      background: var(--sage-light);
+      color: var(--sage);
+      border: 1px solid #C0DD97;
+    }
+
+    .btn-done:hover {
+      background: #C0DD97;
+    }
+
+    .btn-delete {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid #F7C1C1;
+    }
+
+    .btn-delete:hover {
+      background: #F7C1C1;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 52px 20px;
+      background: var(--warm-white);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .empty-state .icon {
+      font-size: 36px;
+      margin-bottom: 14px;
+      opacity: 0.4;
+    }
+
+    .empty-state p {
+      color: var(--ink-muted);
+      font-size: 15px;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+      color: var(--ink-faint);
+    }
   </style>
 </head>
 <body>
-  <h1>Task Manager</h1>
-  <form action="/add" method="POST">
-    <input type="text" name="task" placeholder="Add a new task..." required />
-    <button type="submit">Add</button>
-  </form>
-  <ul>
-    {% for task in tasks %}
-    <li>
-      <span class="{{ 'done-text' if task.done else '' }}">{{ task.text }}</span>
-      <div>
-        {% if not task.done %}
-        <a href="/done/{{ loop.index0 }}">✓ Done</a>
-        {% endif %}
-        <a href="/delete/{{ loop.index0 }}">✕ Delete</a>
+
+  <header>
+    <div class="badge">My workspace</div>
+    <h1>Get things <em>done.</em></h1>
+    <p class="subtitle">Simple, focused task tracking</p>
+  </header>
+
+  <main>
+
+    <!-- Stats -->
+    <div class="stats">
+      {% set total = tasks | length %}
+      {% set done_count = tasks | selectattr('done') | list | length %}
+      {% set pending = total - done_count %}
+      <div class="stat-chip">
+        <div class="num">{{ total }}</div>
+        <div class="lbl">Total</div>
       </div>
-    </li>
-    {% endfor %}
-    {% if not tasks %}
-    <li style="color:#aaa;">No tasks yet. Add one above!</li>
+      <div class="stat-chip">
+        <div class="num">{{ pending }}</div>
+        <div class="lbl">Pending</div>
+      </div>
+      <div class="stat-chip">
+        <div class="num">{{ done_count }}</div>
+        <div class="lbl">Completed</div>
+      </div>
+    </div>
+
+    <!-- Add form -->
+    <form class="add-form" action="/add" method="POST">
+      <input type="text" name="task" placeholder="What needs to be done?" required />
+      <button type="submit">+ Add task</button>
+    </form>
+
+    <!-- Task list -->
+    {% if tasks %}
+    <p class="section-label">Tasks</p>
+    <ul class="task-list">
+      {% for task in tasks %}
+      <li class="task-item {{ 'done' if task.done else '' }}">
+        <span class="task-dot"></span>
+        <span class="task-text">{{ task.text }}</span>
+        <div class="task-actions">
+          {% if not task.done %}
+          <a class="btn-done" href="/done/{{ loop.index0 }}">&#10003; Done</a>
+          {% endif %}
+          <a class="btn-delete" href="/delete/{{ loop.index0 }}">&#10005; Delete</a>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+
+    {% else %}
+    <div class="empty-state">
+      <div class="icon">&#9998;</div>
+      <p>No tasks yet — add one above to get started.</p>
+    </div>
     {% endif %}
-  </ul>
+
+  </main>
+
+  <footer>Task Manager &mdash; stay focused, ship things.</footer>
+
 </body>
 </html>
